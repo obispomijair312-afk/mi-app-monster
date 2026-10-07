@@ -462,7 +462,6 @@ body {
   display: flex; align-items: center; justify-content: space-around;
   z-index: 200;
   box-shadow: 0 -10px 40px rgba(0,0,0,0.6);
-  /* Empuja el contenido por encima de la barra del sistema */
   transform: translateZ(0);
   will-change: transform;
 }
@@ -1005,10 +1004,8 @@ body {
     const isIOS = /iPad|iPhone|iPod/.test(ua) ||
                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
-    // iOS: env() funciona bien, no tocar
     if (isIOS) return;
 
-    // Probamos el valor real de env(safe-area-inset-bottom)
     const probe = document.createElement('div');
     probe.style.cssText =
       'position:fixed;bottom:0;left:0;width:0;height:0;pointer-events:none;' +
@@ -1017,57 +1014,341 @@ body {
     const envBottom = parseFloat(getComputedStyle(probe).paddingBottom) || 0;
     document.documentElement.removeChild(probe);
 
-    // Android típicamente devuelve 0 → aplicamos fallback
     if (isAndroid && envBottom < 5) {
-      // Detectar si es un dispositivo con gesture bar (Android 10+)
-      // Los de 3 botones también necesitan ~20px mínimo
-      let fallback = 24; // valor seguro para gesture bar
-
-      // Si la pantalla es muy chica, un poco menos
+      let fallback = 24;
       if (window.innerWidth < 360) fallback = 20;
-
       document.documentElement.style.setProperty('--safe-bottom', fallback + 'px');
       document.documentElement.setAttribute('data-android-fix', 'true');
     }
   } catch (e) {
-    // Fallback silencioso por si algo falla
     document.documentElement.style.setProperty('--safe-bottom', '20px');
   }
 })();
 
 // ================= CONFIG =================
-const WHATSAPP_NUMBER = '541158333832';
-const BRAND_NAME = 'MONSTER BURGER';
+const WHATSAPP_NUMBER = '541158333832';   // ← Tu número de WhatsApp (sin +, sin espacios)
+const BRAND_NAME = 'MONSTER BURGER';      // ← Nombre de tu marca (aparece en el pedido)
 
-// ================= PRODUCTOS =================
+
+/* ╔══════════════════════════════════════════════════════════════════════╗
+   ║                                                                      ║
+   ║          🍔  ZONA DE PRODUCTOS — EDITÁ ACÁ NADA MÁS  🍔              ║
+   ║                                                                      ║
+   ║   Cada producto es un objeto. Podés EDITAR los valores o AGREGAR     ║
+   ║   nuevos bloques copiando y pegando uno existente.                   ║
+   ║                                                                      ║
+   ║   ESTRUCTURA DE CADA PRODUCTO:                                       ║
+   ║   ┌──────────────────────────────────────────────────────────────┐   ║
+   ║   │  id:       "identificador único"  (no repetir nunca)         │   ║
+   ║   │  name:     "Nombre del producto"  (lo que se muestra)        │   ║
+   ║   │  category: "hamburguesas" | "pizzas" | "acompanamientos"     │   ║
+   ║   │            | "bebidas" | "promos"  (¡no cambiar!)            │   ║
+   ║   │  desc:     "Descripción / ingredientes"                      │   ║
+   ║   │  price:    14000      ← número SIN puntos ni "$"             │   ║
+   ║   │  img:      "https://...jpg"   ← URL de la foto               │   ║
+   ║   │                                                              │   ║
+   ║   │  // OPCIONALES (podés borrarlos):                            │   ║
+   ║   │  badge:    "NUEVA"       ← etiqueta roja/amarilla            │   ║
+   ║   │  badgeType:"new" | "hot" ← "new"=amarillo, "hot"=rojo        │   ║
+   ║   └──────────────────────────────────────────────────────────────┘   ║
+   ║                                                                      ║
+   ╚══════════════════════════════════════════════════════════════════════╝ */
+
+
+/* ═══════════════════════════════════════════════════════════════
+   🍔  HAMBURGUESAS
+   ═══════════════════════════════════════════════════════════════ */
 const hamburguesas = [
-  { id: "ham1", name: "Monster Clásica", category: "hamburguesas", desc: "Medallón 180g, cheddar, lechuga, tomate, cebolla morada, salsa Monster.", price: 8.90, img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&h=400&fit=crop", badge: "🔥 Más pedida", badgeType: "hot" },
-  { id: "ham2", name: "BBQ Bacon", category: "hamburguesas", desc: "Medallón 180g, doble bacon crocante, cheddar, salsa BBQ ahumada.", price: 9.90, img: "https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=400&h=400&fit=crop" },
-  { id: "ham3", name: "Monster Doble", category: "hamburguesas", desc: "Doble medallón 360g, cuádruple cheddar, cebolla caramelizada.", price: 12.50, img: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&h=400&fit=crop", badge: "MONSTRUOSA", badgeType: "hot" },
-  { id: "ham4", name: "Monster Fire", category: "hamburguesas", desc: "Medallón 180g, jalapeños, cheddar, salsa picante Monster.", price: 9.50, img: "https://images.unsplash.com/photo-1572802419224-296b0aeee0d9?w=400&h=400&fit=crop", badge: "NUEVA", badgeType: "new" }
+
+  // ── Burger 1: Monster Clásica ─────────────────────────────
+  {
+    id: "ham1",                                         // ← ID único
+    name: "Monster Clásica",                            // ← Nombre
+    category: "hamburguesas",                           // ← NO cambiar
+    desc: "Medallón 180g, cheddar, lechuga, tomate, cebolla morada, salsa Monster.",  // ← Descripción
+    price: 8.90,                                        // ← Precio (número)
+    img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&h=400&fit=crop",  // ← Foto
+    badge: "🔥 Más pedida",                             // ← Etiqueta (opcional)
+    badgeType: "hot"                                    // ← Color etiqueta
+  },
+
+  // ── Burger 2: BBQ Bacon ───────────────────────────────────
+  {
+    id: "ham2",
+    name: "BBQ Bacon",
+    category: "hamburguesas",
+    desc: "Medallón 180g, doble bacon crocante, cheddar, salsa BBQ ahumada.",
+    price: 9.90,
+    img: "https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=400&h=400&fit=crop"
+  },
+
+  // ── Burger 3: Monster Doble ───────────────────────────────
+  {
+    id: "ham3",
+    name: "Monster Doble",
+    category: "hamburguesas",
+    desc: "Doble medallón 360g, cuádruple cheddar, cebolla caramelizada.",
+    price: 12.50,
+    img: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&h=400&fit=crop",
+    badge: "MONSTRUOSA",
+    badgeType: "hot"
+  },
+
+  // ── Burger 4: Monster Fire ────────────────────────────────
+  {
+    id: "ham4",
+    name: "Monster Fire",
+    category: "hamburguesas",
+    desc: "Medallón 180g, jalapeños, cheddar, salsa picante Monster.",
+    price: 9.50,
+    img: "https://images.unsplash.com/photo-1572802419224-296b0aeee0d9?w=400&h=400&fit=crop",
+    badge: "NUEVA",
+    badgeType: "new"
+  }
+
+  /* ────────────────────────────────────────────────────────────
+     ➕ AGREGAR OTRA HAMBURGUESA:
+     Copiá desde la coma anterior { ... } y pegá antes del ]
+     Cambiá id por uno nuevo: "ham5", "ham6", etc.
+     ──────────────────────────────────────────────────────────── */
+
 ];
+
+
+/* ═══════════════════════════════════════════════════════════════
+   🍕  PIZZAS  (originales + nuevas)
+   ═══════════════════════════════════════════════════════════════ */
 const pizzas = [
-  { id: "piz1", name: "Monster Pepperoni", category: "pizzas", desc: "Salsa San Marzano, mozzarella, pepperoni italiano.", price: 13.50, img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=400&fit=crop" },
-  { id: "piz2", name: "Cuatro Quesos", category: "pizzas", desc: "Gorgonzola, parmigiano, fontina, mozzarella.", price: 14.90, img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=400&fit=crop" },
-  { id: "piz3", name: "BBQ Chicken", category: "pizzas", desc: "Pollo grillado, cebolla roja, salsa BBQ ahumada.", price: 15.20, img: "https://images.unsplash.com/photo-1594007654729-407eedc4be65?w=400&h=400&fit=crop" },
-  { id: "piz4", name: "Monster Supreme", category: "pizzas", desc: "Pepperoni, morrón, cebolla, aceitunas, champiñones.", price: 16.50, img: "https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?w=400&h=400&fit=crop", badge: "COMBO", badgeType: "hot" }
+
+  // ── Pizza 1: Monster Pepperoni ────────────────────────────
+  {
+    id: "piz1",
+    name: "Monster Pepperoni",
+    category: "pizzas",
+    desc: "Salsa San Marzano, mozzarella, pepperoni italiano.",
+    price: 13.50,
+    img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=400&fit=crop"
+  },
+
+  // ── Pizza 2: Cuatro Quesos ────────────────────────────────
+  {
+    id: "piz2",
+    name: "Cuatro Quesos",
+    category: "pizzas",
+    desc: "Gorgonzola, parmigiano, fontina, mozzarella.",
+    price: 14.90,
+    img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=400&fit=crop"
+  },
+
+  // ── Pizza 3: BBQ Chicken ──────────────────────────────────
+  {
+    id: "piz3",
+    name: "BBQ Chicken",
+    category: "pizzas",
+    desc: "Pollo grillado, cebolla roja, salsa BBQ ahumada.",
+    price: 15.20,
+    img: "https://images.unsplash.com/photo-1594007654729-407eedc4be65?w=400&h=400&fit=crop"
+  },
+
+  // ── Pizza 4: Monster Supreme ──────────────────────────────
+  {
+    id: "piz4",
+    name: "Monster Supreme",
+    category: "pizzas",
+    desc: "Pepperoni, morrón, cebolla, aceitunas, champiñones.",
+    price: 16.50,
+    img: "https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?w=400&h=400&fit=crop",
+    badge: "COMBO",
+    badgeType: "hot"
+  },
+
+  /* ═══════════════════════════════════════════════════════════
+     🆕 PIZZAS NUEVAS — las que pediste agregar
+     ═══════════════════════════════════════════════════════════ */
+
+  // ── Pizza 5: NAPOLITANA — $14.000 ─────────────────────────
+  {
+    id: "piz5",
+    name: "Pizza Napolitana",
+    category: "pizzas",
+    desc: "Queso muzzarela, tomates frescos y pesto.",
+    price: 14000,                                       // ← $14.000
+    img: "https://cocinaderestauranteencasa.com/wp-content/uploads/2024/09/EDITADA-1-1170x840.jpg.webp"
+  },
+
+  // ── Pizza 6: FUGAZZETA — $12.000 ──────────────────────────
+  {
+    id: "piz6",
+    name: "Pizza Fugazzeta",
+    category: "pizzas",
+    desc: "Cebolla, salsa y orégano.",
+    price: 12000,                                       // ← $12.000
+    img: "https://saborargento.com.ar/wp-content/uploads/2023/05/Receta-de-Pizza-Fugazzeta.jpg"
+  },
+
+  // ── Pizza 7: JAMÓN Y MORRONES — $15.000 ───────────────────
+  {
+    id: "piz7",
+    name: "Pizza Jamón y Morrones",
+    category: "pizzas",
+    desc: "Jamón cocido y morrones asados.",
+    price: 15000,                                       // ← $15.000
+    img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQiCnHYiF8Uvh3ov9XSZtXsf7sKzFvVRLNaxSmoawS0dkXo-fc7L1YoSxin&s=10"
+  },
+
+  // ── Pizza 8: ESPECIAL (jamón + morrón + huevo) — $16.000 ──
+  {
+    id: "piz8",
+    name: "Pizza Especial",
+    category: "pizzas",
+    desc: "Jamón, morrón y huevo.",
+    price: 16000,                                       // ← $16.000
+    img: "https://cdn.pedix.app/Acj0eQITEQSB6cVtflUj/products/B4mqj9QhzDSeHyKyOKI6-.png?size=800x800",
+    badge: "COMPLETA",
+    badgeType: "new"
+  }
+
+  /* ────────────────────────────────────────────────────────────
+     ➕ AGREGAR OTRA PIZZA:
+     Copiá un bloque { ... }, entero, y pegalo antes del ]
+     Cambiá el id por uno nuevo: "piz9", "piz10", etc.
+     Cambiá name, desc, price, img.
+     ──────────────────────────────────────────────────────────── */
+
 ];
+
+
+/* ═══════════════════════════════════════════════════════════════
+   🍟  ACOMPAÑAMIENTOS / EXTRAS
+   ═══════════════════════════════════════════════════════════════ */
 const acompanamientos = [
-  { id: "aco1", name: "Papas Monster", category: "acompanamientos", desc: "Papas fritas con sal de mar y orégano.", price: 4.50, img: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&h=400&fit=crop" },
-  { id: "aco2", name: "Papas Cheddar & Bacon", category: "acompanamientos", desc: "Papas cubiertas con cheddar fundido y bacon crocante.", price: 6.90, img: "https://images.unsplash.com/photo-1630431341973-02e1b662ec35?w=400&h=400&fit=crop", badge: "🔥 TOP", badgeType: "hot" },
-  { id: "aco3", name: "Aros de Cebolla", category: "acompanamientos", desc: "Aros de cebolla empanizados, salsa Monster.", price: 5.20, img: "https://images.unsplash.com/photo-1639024471283-03518883512d?w=400&h=400&fit=crop" },
-  { id: "aco4", name: "Nuggets de Pollo", category: "acompanamientos", desc: "8 nuggets crocantes + salsa a elección.", price: 5.80, img: "https://images.unsplash.com/photo-1562967914-608f82629710?w=400&h=400&fit=crop" }
+
+  // ── Papas Monster ─────────────────────────────────────────
+  {
+    id: "aco1",
+    name: "Papas Monster",
+    category: "acompanamientos",
+    desc: "Papas fritas con sal de mar y orégano.",
+    price: 4.50,
+    img: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&h=400&fit=crop"
+  },
+
+  // ── Papas Cheddar & Bacon ─────────────────────────────────
+  {
+    id: "aco2",
+    name: "Papas Cheddar & Bacon",
+    category: "acompanamientos",
+    desc: "Papas cubiertas con cheddar fundido y bacon crocante.",
+    price: 6.90,
+    img: "https://images.unsplash.com/photo-1630431341973-02e1b662ec35?w=400&h=400&fit=crop",
+    badge: "🔥 TOP",
+    badgeType: "hot"
+  },
+
+  // ── Aros de Cebolla ───────────────────────────────────────
+  {
+    id: "aco3",
+    name: "Aros de Cebolla",
+    category: "acompanamientos",
+    desc: "Aros de cebolla empanizados, salsa Monster.",
+    price: 5.20,
+    img: "https://images.unsplash.com/photo-1639024471283-03518883512d?w=400&h=400&fit=crop"
+  },
+
+  // ── Nuggets de Pollo ──────────────────────────────────────
+  {
+    id: "aco4",
+    name: "Nuggets de Pollo",
+    category: "acompanamientos",
+    desc: "8 nuggets crocantes + salsa a elección.",
+    price: 5.80,
+    img: "https://images.unsplash.com/photo-1562967914-608f82629710?w=400&h=400&fit=crop"
+  }
+
 ];
+
+
+/* ═══════════════════════════════════════════════════════════════
+   🥤  BEBIDAS
+   ═══════════════════════════════════════════════════════════════ */
 const bebidas = [
-  { id: "beb1", name: "Coca-Cola 1.5L", category: "bebidas", desc: "Gaseosa bien fría, formato familiar.", price: 3.20, img: "https://images.unsplash.com/photo-1622484211978-e6c3e5f6ed32?w=400&h=400&fit=crop" },
-  { id: "beb2", name: "Pepsi Lata 355ml", category: "bebidas", desc: "Lata individual helada.", price: 1.80, img: "https://images.unsplash.com/photo-1629203851122-3726ecdf080e?w=400&h=400&fit=crop" },
-  { id: "beb3", name: "Cerveza Artesanal", category: "bebidas", desc: "IPA local, 500ml, bien fría.", price: 4.50, img: "https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400&h=400&fit=crop" },
-  { id: "beb4", name: "Agua Mineral 500ml", category: "bebidas", desc: "Sin gas o con gas.", price: 1.50, img: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400&h=400&fit=crop" }
+
+  // ── Coca-Cola 1.5L ────────────────────────────────────────
+  {
+    id: "beb1",
+    name: "Coca-Cola 1.5L",
+    category: "bebidas",
+    desc: "Gaseosa bien fría, formato familiar.",
+    price: 3.20,
+    img: "https://images.unsplash.com/photo-1622484211978-e6c3e5f6ed32?w=400&h=400&fit=crop"
+  },
+
+  // ── Pepsi Lata 355ml ──────────────────────────────────────
+  {
+    id: "beb2",
+    name: "Pepsi Lata 355ml",
+    category: "bebidas",
+    desc: "Lata individual helada.",
+    price: 1.80,
+    img: "https://images.unsplash.com/photo-1629203851122-3726ecdf080e?w=400&h=400&fit=crop"
+  },
+
+  // ── Cerveza Artesanal ─────────────────────────────────────
+  {
+    id: "beb3",
+    name: "Cerveza Artesanal",
+    category: "bebidas",
+    desc: "IPA local, 500ml, bien fría.",
+    price: 4.50,
+    img: "https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400&h=400&fit=crop"
+  },
+
+  // ── Agua Mineral 500ml ────────────────────────────────────
+  {
+    id: "beb4",
+    name: "Agua Mineral 500ml",
+    category: "bebidas",
+    desc: "Sin gas o con gas.",
+    price: 1.50,
+    img: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400&h=400&fit=crop"
+  }
+
 ];
+
+
+/* ═══════════════════════════════════════════════════════════════
+   🔥  PROMOS
+   ═══════════════════════════════════════════════════════════════ */
 const promociones = [
-  { id: "promo1", name: "🚀 Combo Monster", category: "promos", desc: "1 Hamburguesa + Papas + Bebida a elección.", price: 12.90, img: "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400&h=400&fit=crop", badge: "OFERTA", badgeType: "new" },
-  { id: "promo2", name: "🍕 Pizza + Bebida", category: "promos", desc: "Cualquier pizza + gaseosa 1.5L.", price: 16.90, img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=400&fit=crop" }
+
+  // ── Combo Monster ─────────────────────────────────────────
+  {
+    id: "promo1",
+    name: "🚀 Combo Monster",
+    category: "promos",
+    desc: "1 Hamburguesa + Papas + Bebida a elección.",
+    price: 12.90,
+    img: "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400&h=400&fit=crop",
+    badge: "OFERTA",
+    badgeType: "new"
+  },
+
+  // ── Pizza + Bebida ────────────────────────────────────────
+  {
+    id: "promo2",
+    name: "🍕 Pizza + Bebida",
+    category: "promos",
+    desc: "Cualquier pizza + gaseosa 1.5L.",
+    price: 16.90,
+    img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=400&fit=crop"
+  }
+
 ];
+
+
+/* ═══════════════════════════════════════════════════════════════
+   ⚙️  SISTEMA — NO TOCAR (arma el catálogo completo)
+   ═══════════════════════════════════════════════════════════════ */
 const allProducts = [...hamburguesas, ...pizzas, ...acompanamientos, ...bebidas, ...promociones];
 
 // ================= ESTADO =================
