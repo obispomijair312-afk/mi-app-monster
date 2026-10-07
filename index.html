@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0a0a0a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>MONSTER BURGER � App</title>
+<title>MONSTER BURGER · App</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,7 +28,7 @@
   --blanco: #FFFFFF;
   --gris-claro: #D6D6D6;
 
-  /* IMPORTANTE: esta variable la actualiza el JS seg�n el dispositivo */
+  /* IMPORTANTE: esta variable la actualiza el JS según el dispositivo */
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-top: env(safe-area-inset-top, 0px);
 
@@ -290,7 +290,7 @@ body {
   transform: rotate(-2deg);
 }
 
-/* ============ CATEGOR�AS ============ */
+/* ============ CATEGORÍAS ============ */
 .app-cats {
   position: sticky;
   top: calc(var(--header-height) + var(--safe-top));
@@ -446,7 +446,7 @@ body {
 .app-empty-text { font-size: 0.8rem; color: #666; }
 
 /* ============================================================
-   BOTTOM NAV � CORREGIDO PARA ANDROID
+   BOTTOM NAV — CORREGIDO PARA ANDROID
    ============================================================ */
 .app-nav {
   position: fixed; bottom: 0; left: 0; right: 0;
@@ -898,13 +898,13 @@ body {
 
   <nav class="app-nav-desktop">
     <button class="nav-link active" data-tab="home" onclick="setTab('home')">Inicio</button>
-    <button class="nav-link" data-tab="menu" onclick="setTab('menu')">Men�</button>
+    <button class="nav-link" data-tab="menu" onclick="setTab('menu')">Menú</button>
     <button class="nav-link" data-tab="profile" onclick="setTab('profile')">Perfil</button>
   </nav>
 
   <div class="app-search" id="appSearch">
     <i class="fas fa-search"></i>
-    <input type="text" id="searchInput" placeholder="Buscar en el men�..." autocomplete="off">
+    <input type="text" id="searchInput" placeholder="Buscar en el menú..." autocomplete="off">
   </div>
 
   <button class="app-icon-btn" onclick="openCartSheet()" aria-label="Abrir carrito">
@@ -919,9 +919,9 @@ body {
     <div class="app-hero-inner">
       <div class="app-hero-badge"><i class="fas fa-fire"></i> TENEMOS DELIVERY</div>
       <h1 class="app-hero-title">EL SABOR QUE <span>DESATA AL MONSTRUO</span></h1>
-      <p class="app-hero-sub">Hamburguesas brutales � Sabor sin l�mites</p>
+      <p class="app-hero-sub">Hamburguesas brutales · Sabor sin límites</p>
       <div class="app-hero-ctas">
-        <button class="app-btn app-btn-primary" onclick="scrollToMenu()"><i class="fas fa-utensils"></i> Ver men�</button>
+        <button class="app-btn app-btn-primary" onclick="scrollToMenu()"><i class="fas fa-utensils"></i> Ver menú</button>
         <button class="app-btn app-btn-ghost" onclick="scrollToMenu()"><i class="fas fa-bolt"></i> Pedir</button>
       </div>
     </div>
@@ -929,9 +929,9 @@ body {
 
   <div class="app-carousel">
     <div class="app-feature">
-      <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&q=80" alt="Monster Cl�sica">
-      <div class="app-feature-tag">?? M�s pedida</div>
-      <div class="app-feature-label">Monster Cl�sica</div>
+      <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&q=80" alt="Monster Clásica">
+      <div class="app-feature-tag">🔥 Más pedida</div>
+      <div class="app-feature-label">Monster Clásica</div>
     </div>
     <div class="app-feature">
       <img src="https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=800&q=80" alt="BBQ Bacon">
@@ -947,11 +947,11 @@ body {
 
   <div class="app-cats" id="appCats">
     <div class="app-cats-scroll">
-      <button class="app-cat active" data-category="promos"><span class="emoji">??</span> Promos</button>
-      <button class="app-cat" data-category="hamburguesas"><span class="emoji">??</span> Burgers</button>
-      <button class="app-cat" data-category="pizzas"><span class="emoji">??</span> Pizzas</button>
-      <button class="app-cat" data-category="acompanamientos"><span class="emoji">??</span> Extras</button>
-      <button class="app-cat" data-category="bebidas"><span class="emoji">??</span> Bebidas</button>
+      <button class="app-cat active" data-category="promos"><span class="emoji">🔥</span> Promos</button>
+      <button class="app-cat" data-category="hamburguesas"><span class="emoji">🍔</span> Burgers</button>
+      <button class="app-cat" data-category="pizzas"><span class="emoji">🍕</span> Pizzas</button>
+      <button class="app-cat" data-category="acompanamientos"><span class="emoji">🍟</span> Extras</button>
+      <button class="app-cat" data-category="bebidas"><span class="emoji">🥤</span> Bebidas</button>
     </div>
   </div>
 
@@ -964,7 +964,7 @@ body {
     <i class="fas fa-home"></i><span>Inicio</span>
   </button>
   <button class="app-nav-item" data-tab="menu" onclick="setTab('menu')">
-    <i class="fas fa-utensils"></i><span>Men�</span>
+    <i class="fas fa-utensils"></i><span>Menú</span>
   </button>
   <button class="app-nav-item" data-tab="cart" onclick="openCartSheet()">
     <i class="fas fa-shopping-bag"></i><span>Carrito</span>
@@ -993,11 +993,11 @@ body {
 </div>
 
 <script>
-/* --------------------------------------------------------------
-   FIX CR�TICO ANDROID: la barra de navegaci�n del sistema NO se
-   reporta con env(safe-area-inset-bottom), as� que la detectamos
+/* ══════════════════════════════════════════════════════════════
+   FIX CRÍTICO ANDROID: la barra de navegación del sistema NO se
+   reporta con env(safe-area-inset-bottom), así que la detectamos
    y aplicamos un fallback. Se ejecuta ANTES de cualquier render.
-   -------------------------------------------------------------- */
+   ══════════════════════════════════════════════════════════════ */
 (function fixAndroidBottomBar() {
   try {
     const ua = navigator.userAgent;
@@ -1017,10 +1017,10 @@ body {
     const envBottom = parseFloat(getComputedStyle(probe).paddingBottom) || 0;
     document.documentElement.removeChild(probe);
 
-    // Android t�picamente devuelve 0 ? aplicamos fallback
+    // Android típicamente devuelve 0 → aplicamos fallback
     if (isAndroid && envBottom < 5) {
       // Detectar si es un dispositivo con gesture bar (Android 10+)
-      // Los de 3 botones tambi�n necesitan ~20px m�nimo
+      // Los de 3 botones también necesitan ~20px mínimo
       let fallback = 24; // valor seguro para gesture bar
 
       // Si la pantalla es muy chica, un poco menos
@@ -1041,32 +1041,32 @@ const BRAND_NAME = 'MONSTER BURGER';
 
 // ================= PRODUCTOS =================
 const hamburguesas = [
-  { id: "ham1", name: "Monster Cl�sica", category: "hamburguesas", desc: "Medall�n 180g, cheddar, lechuga, tomate, cebolla morada, salsa Monster.", price: 8.90, img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&h=400&fit=crop", badge: "?? M�s pedida", badgeType: "hot" },
-  { id: "ham2", name: "BBQ Bacon", category: "hamburguesas", desc: "Medall�n 180g, doble bacon crocante, cheddar, salsa BBQ ahumada.", price: 9.90, img: "https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=400&h=400&fit=crop" },
-  { id: "ham3", name: "Monster Doble", category: "hamburguesas", desc: "Doble medall�n 360g, cu�druple cheddar, cebolla caramelizada.", price: 12.50, img: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&h=400&fit=crop", badge: "MONSTRUOSA", badgeType: "hot" },
-  { id: "ham4", name: "Monster Fire", category: "hamburguesas", desc: "Medall�n 180g, jalape�os, cheddar, salsa picante Monster.", price: 9.50, img: "https://images.unsplash.com/photo-1572802419224-296b0aeee0d9?w=400&h=400&fit=crop", badge: "NUEVA", badgeType: "new" }
+  { id: "ham1", name: "Monster Clásica", category: "hamburguesas", desc: "Medallón 180g, cheddar, lechuga, tomate, cebolla morada, salsa Monster.", price: 8.90, img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&h=400&fit=crop", badge: "🔥 Más pedida", badgeType: "hot" },
+  { id: "ham2", name: "BBQ Bacon", category: "hamburguesas", desc: "Medallón 180g, doble bacon crocante, cheddar, salsa BBQ ahumada.", price: 9.90, img: "https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=400&h=400&fit=crop" },
+  { id: "ham3", name: "Monster Doble", category: "hamburguesas", desc: "Doble medallón 360g, cuádruple cheddar, cebolla caramelizada.", price: 12.50, img: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&h=400&fit=crop", badge: "MONSTRUOSA", badgeType: "hot" },
+  { id: "ham4", name: "Monster Fire", category: "hamburguesas", desc: "Medallón 180g, jalapeños, cheddar, salsa picante Monster.", price: 9.50, img: "https://images.unsplash.com/photo-1572802419224-296b0aeee0d9?w=400&h=400&fit=crop", badge: "NUEVA", badgeType: "new" }
 ];
 const pizzas = [
   { id: "piz1", name: "Monster Pepperoni", category: "pizzas", desc: "Salsa San Marzano, mozzarella, pepperoni italiano.", price: 13.50, img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=400&fit=crop" },
   { id: "piz2", name: "Cuatro Quesos", category: "pizzas", desc: "Gorgonzola, parmigiano, fontina, mozzarella.", price: 14.90, img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=400&fit=crop" },
   { id: "piz3", name: "BBQ Chicken", category: "pizzas", desc: "Pollo grillado, cebolla roja, salsa BBQ ahumada.", price: 15.20, img: "https://images.unsplash.com/photo-1594007654729-407eedc4be65?w=400&h=400&fit=crop" },
-  { id: "piz4", name: "Monster Supreme", category: "pizzas", desc: "Pepperoni, morr�n, cebolla, aceitunas, champi�ones.", price: 16.50, img: "https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?w=400&h=400&fit=crop", badge: "COMBO", badgeType: "hot" }
+  { id: "piz4", name: "Monster Supreme", category: "pizzas", desc: "Pepperoni, morrón, cebolla, aceitunas, champiñones.", price: 16.50, img: "https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?w=400&h=400&fit=crop", badge: "COMBO", badgeType: "hot" }
 ];
 const acompanamientos = [
-  { id: "aco1", name: "Papas Monster", category: "acompanamientos", desc: "Papas fritas con sal de mar y or�gano.", price: 4.50, img: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&h=400&fit=crop" },
-  { id: "aco2", name: "Papas Cheddar & Bacon", category: "acompanamientos", desc: "Papas cubiertas con cheddar fundido y bacon crocante.", price: 6.90, img: "https://images.unsplash.com/photo-1630431341973-02e1b662ec35?w=400&h=400&fit=crop", badge: "?? TOP", badgeType: "hot" },
+  { id: "aco1", name: "Papas Monster", category: "acompanamientos", desc: "Papas fritas con sal de mar y orégano.", price: 4.50, img: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&h=400&fit=crop" },
+  { id: "aco2", name: "Papas Cheddar & Bacon", category: "acompanamientos", desc: "Papas cubiertas con cheddar fundido y bacon crocante.", price: 6.90, img: "https://images.unsplash.com/photo-1630431341973-02e1b662ec35?w=400&h=400&fit=crop", badge: "🔥 TOP", badgeType: "hot" },
   { id: "aco3", name: "Aros de Cebolla", category: "acompanamientos", desc: "Aros de cebolla empanizados, salsa Monster.", price: 5.20, img: "https://images.unsplash.com/photo-1639024471283-03518883512d?w=400&h=400&fit=crop" },
-  { id: "aco4", name: "Nuggets de Pollo", category: "acompanamientos", desc: "8 nuggets crocantes + salsa a elecci�n.", price: 5.80, img: "https://images.unsplash.com/photo-1562967914-608f82629710?w=400&h=400&fit=crop" }
+  { id: "aco4", name: "Nuggets de Pollo", category: "acompanamientos", desc: "8 nuggets crocantes + salsa a elección.", price: 5.80, img: "https://images.unsplash.com/photo-1562967914-608f82629710?w=400&h=400&fit=crop" }
 ];
 const bebidas = [
-  { id: "beb1", name: "Coca-Cola 1.5L", category: "bebidas", desc: "Gaseosa bien fr�a, formato familiar.", price: 3.20, img: "https://images.unsplash.com/photo-1622484211978-e6c3e5f6ed32?w=400&h=400&fit=crop" },
+  { id: "beb1", name: "Coca-Cola 1.5L", category: "bebidas", desc: "Gaseosa bien fría, formato familiar.", price: 3.20, img: "https://images.unsplash.com/photo-1622484211978-e6c3e5f6ed32?w=400&h=400&fit=crop" },
   { id: "beb2", name: "Pepsi Lata 355ml", category: "bebidas", desc: "Lata individual helada.", price: 1.80, img: "https://images.unsplash.com/photo-1629203851122-3726ecdf080e?w=400&h=400&fit=crop" },
-  { id: "beb3", name: "Cerveza Artesanal", category: "bebidas", desc: "IPA local, 500ml, bien fr�a.", price: 4.50, img: "https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400&h=400&fit=crop" },
+  { id: "beb3", name: "Cerveza Artesanal", category: "bebidas", desc: "IPA local, 500ml, bien fría.", price: 4.50, img: "https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400&h=400&fit=crop" },
   { id: "beb4", name: "Agua Mineral 500ml", category: "bebidas", desc: "Sin gas o con gas.", price: 1.50, img: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400&h=400&fit=crop" }
 ];
 const promociones = [
-  { id: "promo1", name: "?? Combo Monster", category: "promos", desc: "1 Hamburguesa + Papas + Bebida a elecci�n.", price: 12.90, img: "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400&h=400&fit=crop", badge: "OFERTA", badgeType: "new" },
-  { id: "promo2", name: "?? Pizza + Bebida", category: "promos", desc: "Cualquier pizza + gaseosa 1.5L.", price: 16.90, img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=400&fit=crop" }
+  { id: "promo1", name: "🚀 Combo Monster", category: "promos", desc: "1 Hamburguesa + Papas + Bebida a elección.", price: 12.90, img: "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400&h=400&fit=crop", badge: "OFERTA", badgeType: "new" },
+  { id: "promo2", name: "🍕 Pizza + Bebida", category: "promos", desc: "Cualquier pizza + gaseosa 1.5L.", price: 16.90, img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=400&fit=crop" }
 ];
 const allProducts = [...hamburguesas, ...pizzas, ...acompanamientos, ...bebidas, ...promociones];
 
@@ -1157,7 +1157,7 @@ function removeItem(id) {
 }
 function clearCart() {
   if (cart.length === 0) return;
-  if (confirm('�Vaciar el pedido completo?')) {
+  if (confirm('¿Vaciar el pedido completo?')) {
     cart = []; saveCart(); updateCartBadges(); renderCartSheet();
     showToast('Carrito vaciado', 'fa-trash');
   }
@@ -1190,9 +1190,9 @@ function renderMenu() {
   if (products.length === 0) {
     list.innerHTML = `
       <div class="app-empty">
-        <div class="app-empty-emoji">??</div>
-        <div class="app-empty-title">Nada por ac�</div>
-        <div class="app-empty-text">Prob� con otra b�squeda o categor�a</div>
+        <div class="app-empty-emoji">👹</div>
+        <div class="app-empty-title">Nada por acá</div>
+        <div class="app-empty-text">Probá con otra búsqueda o categoría</div>
       </div>`;
     return;
   }
@@ -1205,7 +1205,7 @@ function renderMenu() {
     ? `Resultados (${products.length})`
     : `Las ${categoryNames[currentCategory] || 'estrellas'} del monstruo`;
 
-  let html = `<div class="app-section-title"><span>??</span> ${sectionTitle}</div>`;
+  let html = `<div class="app-section-title"><span>👹</span> ${sectionTitle}</div>`;
 
   products.forEach(p => {
     let badgeHTML = '';
@@ -1244,11 +1244,11 @@ function renderCartSheet() {
   if (cart.length === 0) {
     body.innerHTML = `
       <div class="cart-empty">
-        <div class="cart-empty-emoji">??</div>
-        <div class="cart-empty-title">Tu pedido est� vac�o</div>
-        <div class="cart-empty-text">Agreg� tus hamburguesas favoritas</div>
+        <div class="cart-empty-emoji">🛒</div>
+        <div class="cart-empty-title">Tu pedido está vacío</div>
+        <div class="cart-empty-text">Agregá tus hamburguesas favoritas</div>
         <button class="app-btn app-btn-primary" onclick="closeCartSheet(); scrollToMenu();" style="max-width:200px; margin: 0 auto;">
-          <i class="fas fa-utensils"></i> Ver men�
+          <i class="fas fa-utensils"></i> Ver menú
         </button>
       </div>`;
     return;
@@ -1264,7 +1264,7 @@ function renderCartSheet() {
           <div class="cart-item-name">${item.name}</div>
           <div class="cart-item-price">${formatPrice(item.price)} c/u</div>
           <div class="cart-item-qty">
-            <button class="qty-btn" onclick="updateQuantity('${item.id}', -1)">-</button>
+            <button class="qty-btn" onclick="updateQuantity('${item.id}', -1)">−</button>
             <span class="qty-num">${item.quantity}</span>
             <button class="qty-btn plus" onclick="updateQuantity('${item.id}', 1)">+</button>
           </div>
@@ -1296,20 +1296,20 @@ function renderCartSheet() {
         <input type="text" id="customer-name" placeholder="Tu nombre" autocomplete="off">
       </div>
       <div class="form-field">
-        <label><i class="fab fa-whatsapp"></i> Tel�fono *</label>
+        <label><i class="fab fa-whatsapp"></i> Teléfono *</label>
         <input type="tel" id="customer-phone" placeholder="11 1234-5678" autocomplete="off">
       </div>
       <div class="form-field">
-        <label><i class="fas fa-home"></i> Direcci�n *</label>
-        <input type="text" id="shipping-address" placeholder="Calle, n�mero, barrio" autocomplete="off">
+        <label><i class="fas fa-home"></i> Dirección *</label>
+        <input type="text" id="shipping-address" placeholder="Calle, número, barrio" autocomplete="off">
       </div>
       <div class="form-field">
         <label><i class="fas fa-credit-card"></i> Pago *</label>
         <select id="payment-method">
           <option value="">Seleccionar...</option>
-          <option value="Transferencia">?? Transferencia</option>
-          <option value="Efectivo">?? Efectivo</option>
-          <option value="Mercado Pago">?? Mercado Pago</option>
+          <option value="Transferencia">📲 Transferencia</option>
+          <option value="Efectivo">💵 Efectivo</option>
+          <option value="Mercado Pago">🟡 Mercado Pago</option>
         </select>
       </div>
       <div class="form-field">
@@ -1337,7 +1337,7 @@ function formatDateAR() {
   }).replace(/\b\w/g, l => l.toUpperCase());
 }
 function checkout() {
-  if (cart.length === 0) { showToast('El carrito est� vac�o', 'fa-exclamation-circle'); return; }
+  if (cart.length === 0) { showToast('El carrito está vacío', 'fa-exclamation-circle'); return; }
   const name = document.getElementById('customer-name')?.value.trim();
   const phone = document.getElementById('customer-phone')?.value.trim();
   const addr = document.getElementById('shipping-address')?.value.trim();
@@ -1345,24 +1345,24 @@ function checkout() {
   const notes = document.getElementById('customer-notes')?.value.trim();
 
   if (!name || !phone || !addr || !pay) {
-    showToast('Complet� todos los campos', 'fa-exclamation-circle');
+    showToast('Completá todos los campos', 'fa-exclamation-circle');
     return;
   }
 
-  let msg = `?? *NUEVO PEDIDO - ${BRAND_NAME}*\n\n`;
-  msg += "?? *CLIENTE*\n";
-  msg += `� ${name}\n� ${phone}\n� ${addr}\n� ${pay}\n`;
-  if (notes) msg += `� ${notes}\n`;
-  msg += "\n?? *PEDIDO*\n\n";
+  let msg = `🛒 *NUEVO PEDIDO - ${BRAND_NAME}*\n\n`;
+  msg += "👤 *CLIENTE*\n";
+  msg += `• ${name}\n• ${phone}\n• ${addr}\n• ${pay}\n`;
+  if (notes) msg += `• ${notes}\n`;
+  msg += "\n📦 *PEDIDO*\n\n";
   let sub = 0;
   cart.forEach((i, idx) => {
     const s = i.price * i.quantity;
     sub += s;
-    msg += `${idx + 1}. ${i.name} �${i.quantity} = ${formatPrice(s)}\n`;
+    msg += `${idx + 1}. ${i.name} ×${i.quantity} = ${formatPrice(s)}\n`;
   });
-  msg += `\n?? *TOTAL: ${formatPrice(sub)}*\n\n`;
-  msg += `?? ${formatDateAR()}\n\n`;
-  msg += "�Gracias! ?? Te contactamos para confirmar.";
+  msg += `\n💰 *TOTAL: ${formatPrice(sub)}*\n\n`;
+  msg += `📅 ${formatDateAR()}\n\n`;
+  msg += "¡Gracias! 👹 Te contactamos para confirmar.";
   window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
@@ -1411,7 +1411,7 @@ function setTab(tab) {
   });
   if (tab === 'home') window.scrollTo({ top: 0, behavior: 'smooth' });
   if (tab === 'menu') scrollToMenu();
-  if (tab === 'profile') showToast('Pr�ximamente: tu perfil', 'fa-user');
+  if (tab === 'profile') showToast('Próximamente: tu perfil', 'fa-user');
 }
 function scrollToMenu() {
   document.getElementById('appCats').scrollIntoView({ behavior: 'smooth', block: 'start' });
