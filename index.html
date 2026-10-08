@@ -281,6 +281,13 @@ body {
   letter-spacing: 0.5px;
   text-shadow: 0 2px 8px rgba(0,0,0,0.9);
 }
+.app-carousel.is-empty { display: none !important; }
+.app-feature { cursor: pointer; }
+.app-feature-label { right: 12px; display: flex; flex-direction: column; gap: 2px; }
+.app-feature-price {
+  font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 800;
+  color: var(--amarillo); letter-spacing: 0.3px; text-transform: none;
+}
 .app-feature-tag {
   position: absolute; top: 10px; left: 10px;
   background: linear-gradient(135deg, var(--rojo), var(--naranja));
@@ -462,6 +469,7 @@ body {
   display: flex; align-items: center; justify-content: space-around;
   z-index: 200;
   box-shadow: 0 -10px 40px rgba(0,0,0,0.6);
+  /* Empuja el contenido por encima de la barra del sistema */
   transform: translateZ(0);
   will-change: transform;
 }
@@ -808,6 +816,9 @@ body {
   }
   .app-feature-label { font-size: 1.25rem; }
   .app-feature-tag { font-size: 0.7rem; padding: 5px 12px; }
+  .app-feature-price { font-size: 1rem; }
+  .app-carousel[data-count="1"] { grid-template-columns: minmax(0, 440px); justify-content: center; }
+  .app-carousel[data-count="2"] { grid-template-columns: repeat(2, minmax(0, 440px)); justify-content: center; }
 
   .app-cats { padding: 14px 0; }
   .app-cats-scroll { justify-content: center; gap: 10px; }
@@ -926,23 +937,7 @@ body {
     </div>
   </section>
 
-  <div class="app-carousel">
-    <div class="app-feature">
-      <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&q=80" alt="Monster Clásica">
-      <div class="app-feature-tag">🔥 Más pedida</div>
-      <div class="app-feature-label">Monster Clásica</div>
-    </div>
-    <div class="app-feature">
-      <img src="https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=800&q=80" alt="BBQ Bacon">
-      <div class="app-feature-tag">Nueva</div>
-      <div class="app-feature-label">BBQ Bacon</div>
-    </div>
-    <div class="app-feature">
-      <img src="https://images.unsplash.com/photo-1550547660-d9450f859349?w=800&q=80" alt="Doble">
-      <div class="app-feature-tag">Monstruosa</div>
-      <div class="app-feature-label">Monster Doble</div>
-    </div>
-  </div>
+  <div class="app-carousel is-empty" id="promoCarousel"></div>
 
   <div class="app-cats" id="appCats">
     <div class="app-cats-scroll">
@@ -1004,8 +999,10 @@ body {
     const isIOS = /iPad|iPhone|iPod/.test(ua) ||
                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
+    // iOS: env() funciona bien, no tocar
     if (isIOS) return;
 
+    // Probamos el valor real de env(safe-area-inset-bottom)
     const probe = document.createElement('div');
     probe.style.cssText =
       'position:fixed;bottom:0;left:0;width:0;height:0;pointer-events:none;' +
@@ -1014,342 +1011,244 @@ body {
     const envBottom = parseFloat(getComputedStyle(probe).paddingBottom) || 0;
     document.documentElement.removeChild(probe);
 
+    // Android típicamente devuelve 0 → aplicamos fallback
     if (isAndroid && envBottom < 5) {
-      let fallback = 24;
+      // Detectar si es un dispositivo con gesture bar (Android 10+)
+      // Los de 3 botones también necesitan ~20px mínimo
+      let fallback = 24; // valor seguro para gesture bar
+
+      // Si la pantalla es muy chica, un poco menos
       if (window.innerWidth < 360) fallback = 20;
+
       document.documentElement.style.setProperty('--safe-bottom', fallback + 'px');
       document.documentElement.setAttribute('data-android-fix', 'true');
     }
   } catch (e) {
+    // Fallback silencioso por si algo falla
     document.documentElement.style.setProperty('--safe-bottom', '20px');
   }
 })();
 
 // ================= CONFIG =================
-const WHATSAPP_NUMBER = '541158333832';   // ← Tu número de WhatsApp (sin +, sin espacios)
-const BRAND_NAME = 'MONSTER BURGER';      // ← Nombre de tu marca (aparece en el pedido)
+const WHATSAPP_NUMBER = '541158333832';
+const BRAND_NAME = 'MONSTER BURGER';
 
+// ================= PRODUCTOS (desde Google Sheets vía SheetDB) =================
+const API_URL = 'https://sheetdb.io/api/v1/t0i7d5sh7kwuf';
+const PRODUCTS_CACHE_KEY = 'monster-burger-products-v1';
+const REFRESH_MS = 2 * 60 * 1000; // vuelve a consultar la hoja si pasaron 2 min
+const PLACEHOLDER_IMG = 'https://via.placeholder.com/400/151515/FFD000?text=MB';
 
-/* ╔══════════════════════════════════════════════════════════════════════╗
-   ║                                                                      ║
-   ║          🍔  ZONA DE PRODUCTOS — EDITÁ ACÁ NADA MÁS  🍔              ║
-   ║                                                                      ║
-   ║   Cada producto es un objeto. Podés EDITAR los valores o AGREGAR     ║
-   ║   nuevos bloques copiando y pegando uno existente.                   ║
-   ║                                                                      ║
-   ║   ESTRUCTURA DE CADA PRODUCTO:                                       ║
-   ║   ┌──────────────────────────────────────────────────────────────┐   ║
-   ║   │  id:       "identificador único"  (no repetir nunca)         │   ║
-   ║   │  name:     "Nombre del producto"  (lo que se muestra)        │   ║
-   ║   │  category: "hamburguesas" | "pizzas" | "acompanamientos"     │   ║
-   ║   │            | "bebidas" | "promos"  (¡no cambiar!)            │   ║
-   ║   │  desc:     "Descripción / ingredientes"                      │   ║
-   ║   │  price:    14000      ← número SIN puntos ni "$"             │   ║
-   ║   │  img:      "https://...jpg"   ← URL de la foto               │   ║
-   ║   │                                                              │   ║
-   ║   │  // OPCIONALES (podés borrarlos):                            │   ║
-   ║   │  badge:    "NUEVA"       ← etiqueta roja/amarilla            │   ║
-   ║   │  badgeType:"new" | "hot" ← "new"=amarillo, "hot"=rojo        │   ║
-   ║   └──────────────────────────────────────────────────────────────┘   ║
-   ║                                                                      ║
-   ╚══════════════════════════════════════════════════════════════════════╝ */
+let allProducts = [];
+let productsState = 'loading'; // loading | ready | error
+let lastFetch = 0;
 
+const CATEGORY_META = {
+  promos: { label: 'Promos', emoji: '🔥' },
+  hamburguesas: { label: 'Burgers', emoji: '🍔' },
+  pizzas: { label: 'Pizzas', emoji: '🍕' },
+  acompanamientos: { label: 'Extras', emoji: '🍟' },
+  bebidas: { label: 'Bebidas', emoji: '🥤' }
+};
+const CATEGORY_ORDER = ['promos', 'hamburguesas', 'pizzas', 'acompanamientos', 'bebidas'];
+const CATEGORY_ALIASES = {
+  promo: 'promos', promos: 'promos', promocion: 'promos', promociones: 'promos',
+  hamburguesa: 'hamburguesas', hamburguesas: 'hamburguesas', burger: 'hamburguesas', burgers: 'hamburguesas',
+  pizza: 'pizzas', pizzas: 'pizzas',
+  acompanamiento: 'acompanamientos', acompanamientos: 'acompanamientos', extra: 'acompanamientos', extras: 'acompanamientos',
+  bebida: 'bebidas', bebidas: 'bebidas'
+};
+let categoryMeta = { ...CATEGORY_META };
 
-/* ═══════════════════════════════════════════════════════════════
-   🍔  HAMBURGUESAS
-   ═══════════════════════════════════════════════════════════════ */
-const hamburguesas = [
-
-  // ── Burger 1: Monster Clásica ─────────────────────────────
-  {
-    id: "ham1",                                         // ← ID único
-    name: "Monster Clásica",                            // ← Nombre
-    category: "hamburguesas",                           // ← NO cambiar
-    desc: "Medallón 180g, cheddar, lechuga, tomate, cebolla morada, salsa Monster.",  // ← Descripción
-    price: 8.90,                                        // ← Precio (número)
-    img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&h=400&fit=crop",  // ← Foto
-    badge: "🔥 Más pedida",                             // ← Etiqueta (opcional)
-    badgeType: "hot"                                    // ← Color etiqueta
-  },
-
-  // ── Burger 2: BBQ Bacon ───────────────────────────────────
-  {
-    id: "ham2",
-    name: "BBQ Bacon",
-    category: "hamburguesas",
-    desc: "Medallón 180g, doble bacon crocante, cheddar, salsa BBQ ahumada.",
-    price: 9.90,
-    img: "https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=400&h=400&fit=crop"
-  },
-
-  // ── Burger 3: Monster Doble ───────────────────────────────
-  {
-    id: "ham3",
-    name: "Monster Doble",
-    category: "hamburguesas",
-    desc: "Doble medallón 360g, cuádruple cheddar, cebolla caramelizada.",
-    price: 12.50,
-    img: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&h=400&fit=crop",
-    badge: "MONSTRUOSA",
-    badgeType: "hot"
-  },
-
-  // ── Burger 4: Monster Fire ────────────────────────────────
-  {
-    id: "ham4",
-    name: "Monster Fire",
-    category: "hamburguesas",
-    desc: "Medallón 180g, jalapeños, cheddar, salsa picante Monster.",
-    price: 9.50,
-    img: "https://images.unsplash.com/photo-1572802419224-296b0aeee0d9?w=400&h=400&fit=crop",
-    badge: "NUEVA",
-    badgeType: "new"
+// --- Helpers de lectura de la hoja ---
+function escapeHTML(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function keyify(s) {
+  return String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+}
+function rowToMap(row) {
+  const m = {};
+  Object.keys(row).forEach(k => { m[keyify(k)] = row[k]; });
+  return m;
+}
+function pick(m, names) {
+  for (const n of names) {
+    const v = m[keyify(n)];
+    if (v !== undefined && v !== null && String(v).trim() !== '') return String(v).trim();
   }
-
-  /* ────────────────────────────────────────────────────────────
-     ➕ AGREGAR OTRA HAMBURGUESA:
-     Copiá desde la coma anterior { ... } y pegá antes del ]
-     Cambiá id por uno nuevo: "ham5", "ham6", etc.
-     ──────────────────────────────────────────────────────────── */
-
-];
-
-
-/* ═══════════════════════════════════════════════════════════════
-   🍕  PIZZAS  (originales + nuevas)
-   ═══════════════════════════════════════════════════════════════ */
-const pizzas = [
-
-  // ── Pizza 1: Monster Pepperoni ────────────────────────────
-  {
-    id: "piz1",
-    name: "Monster Pepperoni",
-    category: "pizzas",
-    desc: "Salsa San Marzano, mozzarella, pepperoni italiano.",
-    price: 13.50,
-    img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=400&fit=crop"
-  },
-
-  // ── Pizza 2: Cuatro Quesos ────────────────────────────────
-  {
-    id: "piz2",
-    name: "Cuatro Quesos",
-    category: "pizzas",
-    desc: "Gorgonzola, parmigiano, fontina, mozzarella.",
-    price: 14.90,
-    img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=400&fit=crop"
-  },
-
-  // ── Pizza 3: BBQ Chicken ──────────────────────────────────
-  {
-    id: "piz3",
-    name: "BBQ Chicken",
-    category: "pizzas",
-    desc: "Pollo grillado, cebolla roja, salsa BBQ ahumada.",
-    price: 15.20,
-    img: "https://images.unsplash.com/photo-1594007654729-407eedc4be65?w=400&h=400&fit=crop"
-  },
-
-  // ── Pizza 4: Monster Supreme ──────────────────────────────
-  {
-    id: "piz4",
-    name: "Monster Supreme",
-    category: "pizzas",
-    desc: "Pepperoni, morrón, cebolla, aceitunas, champiñones.",
-    price: 16.50,
-    img: "https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?w=400&h=400&fit=crop",
-    badge: "COMBO",
-    badgeType: "hot"
-  },
-
-  /* ═══════════════════════════════════════════════════════════
-     🆕 PIZZAS NUEVAS — las que pediste agregar
-     ═══════════════════════════════════════════════════════════ */
-
-  // ── Pizza 5: NAPOLITANA — $14.000 ─────────────────────────
-  {
-    id: "piz5",
-    name: "Pizza Napolitana",
-    category: "pizzas",
-    desc: "Queso muzzarela, tomates frescos y pesto.",
-    price: 14000,                                       // ← $14.000
-    img: "https://cocinaderestauranteencasa.com/wp-content/uploads/2024/09/EDITADA-1-1170x840.jpg.webp"
-  },
-
-  // ── Pizza 6: FUGAZZETA — $12.000 ──────────────────────────
-  {
-    id: "piz6",
-    name: "Pizza Fugazzeta",
-    category: "pizzas",
-    desc: "Cebolla, salsa y orégano.",
-    price: 12000,                                       // ← $12.000
-    img: "https://saborargento.com.ar/wp-content/uploads/2023/05/Receta-de-Pizza-Fugazzeta.jpg"
-  },
-
-  // ── Pizza 7: JAMÓN Y MORRONES — $15.000 ───────────────────
-  {
-    id: "piz7",
-    name: "Pizza Jamón y Morrones",
-    category: "pizzas",
-    desc: "Jamón cocido y morrones asados.",
-    price: 15000,                                       // ← $15.000
-    img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQiCnHYiF8Uvh3ov9XSZtXsf7sKzFvVRLNaxSmoawS0dkXo-fc7L1YoSxin&s=10"
-  },
-
-  // ── Pizza 8: ESPECIAL (jamón + morrón + huevo) — $16.000 ──
-  {
-    id: "piz8",
-    name: "Pizza Especial",
-    category: "pizzas",
-    desc: "Jamón, morrón y huevo.",
-    price: 16000,                                       // ← $16.000
-    img: "https://cdn.pedix.app/Acj0eQITEQSB6cVtflUj/products/B4mqj9QhzDSeHyKyOKI6-.png?size=800x800",
-    badge: "COMPLETA",
-    badgeType: "new"
+  return '';
+}
+// Acepta: 8.90 | 8,90 | 8900 | 8.900 | 8.900,50 | $ 8,900.50
+function parsePrice(raw) {
+  let s = String(raw).replace(/[^\d.,]/g, '');
+  if (!s) return 0;
+  const lastDot = s.lastIndexOf('.'), lastComma = s.lastIndexOf(',');
+  if (lastDot > -1 && lastComma > -1) {
+    const dec = lastDot > lastComma ? '.' : ',';
+    const th = dec === '.' ? ',' : '.';
+    s = s.split(th).join('').replace(dec, '.');
+  } else if (lastComma > -1) {
+    s = /,\d{3}$/.test(s) ? s.replace(/,/g, '') : s.replace(',', '.');
+  } else if (lastDot > -1) {
+    if (/\.\d{3}$/.test(s) || (s.match(/\./g) || []).length > 1) s = s.replace(/\./g, '');
   }
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+}
+function isAvailable(m) {
+  const act = pick(m, ['Activo', 'Disponible', 'Visible', 'Estado']);
+  if (act && /^(no|n|false|falso|0|inactivo|oculto|agotado|sinstock)$/.test(keyify(act))) return false;
+  const st = pick(m, ['Stock', 'Cantidad']);
+  if (st !== '' && !isNaN(parseInt(st, 10)) && parseInt(st, 10) <= 0) return false;
+  return true;
+}
+function normalizeCategory(raw) {
+  const k = keyify(raw || '');
+  if (!k) return 'otros';
+  return CATEGORY_ALIASES[k] || k;
+}
+function safeId(raw, idx, used) {
+  let id = String(raw || '').trim().replace(/[^\w-]/g, '_') || ('p' + (idx + 1));
+  while (used.has(id)) id += '_' + idx;
+  used.add(id);
+  return id;
+}
 
-  /* ────────────────────────────────────────────────────────────
-     ➕ AGREGAR OTRA PIZZA:
-     Copiá un bloque { ... }, entero, y pegalo antes del ]
-     Cambiá el id por uno nuevo: "piz9", "piz10", etc.
-     Cambiá name, desc, price, img.
-     ──────────────────────────────────────────────────────────── */
+function parseProducts(data) {
+  const used = new Set();
+  const out = [];
+  categoryMeta = { ...CATEGORY_META };
+  data.forEach((row, idx) => {
+    const m = rowToMap(row);
+    const name = pick(m, ['Nombre', 'Producto', 'Name']);
+    const price = parsePrice(pick(m, ['Precio', 'Price']));
+    if (!name || price <= 0 || !isAvailable(m)) return; // ignora filas incompletas / ocultas / sin stock
 
-];
+    const catRaw = pick(m, ['Categoria', 'Category']);
+    const category = normalizeCategory(catRaw);
+    if (!categoryMeta[category]) {
+      const label = (catRaw || 'Otros').replace(/\b\w/g, l => l.toUpperCase());
+      categoryMeta[category] = { label, emoji: '🍽️' };
+    }
 
+    let img = pick(m, ['Imagen', 'URL Imagen', 'Foto', 'Img', 'Image']);
+    if (!/^https?:\/\//i.test(img)) img = PLACEHOLDER_IMG;
 
-/* ═══════════════════════════════════════════════════════════════
-   🍟  ACOMPAÑAMIENTOS / EXTRAS
-   ═══════════════════════════════════════════════════════════════ */
-const acompanamientos = [
+    const badge = pick(m, ['Badge', 'Etiqueta', 'Insignia']);
+    const bt = keyify(pick(m, ['TipoBadge', 'Tipo Badge']));
+    out.push({
+      id: safeId(pick(m, ['ID', 'Codigo']), idx, used),
+      name, category, price, img,
+      desc: pick(m, ['Descripcion', 'Detalle', 'Description']),
+      badge,
+      badgeType: bt === 'new' ? 'new' : 'hot'
+    });
+  });
+  return out;
+}
 
-  // ── Papas Monster ─────────────────────────────────────────
-  {
-    id: "aco1",
-    name: "Papas Monster",
-    category: "acompanamientos",
-    desc: "Papas fritas con sal de mar y orégano.",
-    price: 4.50,
-    img: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&h=400&fit=crop"
-  },
-
-  // ── Papas Cheddar & Bacon ─────────────────────────────────
-  {
-    id: "aco2",
-    name: "Papas Cheddar & Bacon",
-    category: "acompanamientos",
-    desc: "Papas cubiertas con cheddar fundido y bacon crocante.",
-    price: 6.90,
-    img: "https://images.unsplash.com/photo-1630431341973-02e1b662ec35?w=400&h=400&fit=crop",
-    badge: "🔥 TOP",
-    badgeType: "hot"
-  },
-
-  // ── Aros de Cebolla ───────────────────────────────────────
-  {
-    id: "aco3",
-    name: "Aros de Cebolla",
-    category: "acompanamientos",
-    desc: "Aros de cebolla empanizados, salsa Monster.",
-    price: 5.20,
-    img: "https://images.unsplash.com/photo-1639024471283-03518883512d?w=400&h=400&fit=crop"
-  },
-
-  // ── Nuggets de Pollo ──────────────────────────────────────
-  {
-    id: "aco4",
-    name: "Nuggets de Pollo",
-    category: "acompanamientos",
-    desc: "8 nuggets crocantes + salsa a elección.",
-    price: 5.80,
-    img: "https://images.unsplash.com/photo-1562967914-608f82629710?w=400&h=400&fit=crop"
+// --- Tarjetas destacadas = productos de la categoría Promociones ---
+function renderPromoCarousel() {
+  const box = document.getElementById('promoCarousel');
+  if (!box) return;
+  const promos = allProducts.filter(p => p.category === 'promos');
+  if (!promos.length) {            // sin promociones -> se oculta toda la sección
+    box.classList.add('is-empty');
+    box.innerHTML = '';
+    box.removeAttribute('data-count');
+    return;
   }
+  box.dataset.count = Math.min(promos.length, 3);
+  box.innerHTML = promos.map(p => `
+    <div class="app-feature" data-id="${escapeHTML(p.id)}" role="button" tabindex="0">
+      <img src="${escapeHTML(p.img)}" alt="${escapeHTML(p.name)}" onerror="this.src='${PLACEHOLDER_IMG}'">
+      <div class="app-feature-tag">${escapeHTML(p.badge || 'Promo')}</div>
+      <div class="app-feature-label">${escapeHTML(p.name)}<span class="app-feature-price">${formatPrice(p.price)}</span></div>
+    </div>`).join('');
+  box.classList.remove('is-empty');
+}
+function initPromoCarousel() {
+  const box = document.getElementById('promoCarousel');
+  if (!box) return;
+  const go = (e) => {
+    if (!e.target.closest('.app-feature')) return;
+    if (e.type === 'keydown' && e.key !== 'Enter') return;
+    currentCategory = 'promos';
+    searchTerm = '';
+    document.getElementById('searchInput').value = '';
+    renderCategories();
+    renderMenu();
+    scrollToMenu();
+  };
+  box.addEventListener('click', go);
+  box.addEventListener('keydown', go);
+}
 
-];
-
-
-/* ═══════════════════════════════════════════════════════════════
-   🥤  BEBIDAS
-   ═══════════════════════════════════════════════════════════════ */
-const bebidas = [
-
-  // ── Coca-Cola 1.5L ────────────────────────────────────────
-  {
-    id: "beb1",
-    name: "Coca-Cola 1.5L",
-    category: "bebidas",
-    desc: "Gaseosa bien fría, formato familiar.",
-    price: 3.20,
-    img: "https://images.unsplash.com/photo-1622484211978-e6c3e5f6ed32?w=400&h=400&fit=crop"
-  },
-
-  // ── Pepsi Lata 355ml ──────────────────────────────────────
-  {
-    id: "beb2",
-    name: "Pepsi Lata 355ml",
-    category: "bebidas",
-    desc: "Lata individual helada.",
-    price: 1.80,
-    img: "https://images.unsplash.com/photo-1629203851122-3726ecdf080e?w=400&h=400&fit=crop"
-  },
-
-  // ── Cerveza Artesanal ─────────────────────────────────────
-  {
-    id: "beb3",
-    name: "Cerveza Artesanal",
-    category: "bebidas",
-    desc: "IPA local, 500ml, bien fría.",
-    price: 4.50,
-    img: "https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400&h=400&fit=crop"
-  },
-
-  // ── Agua Mineral 500ml ────────────────────────────────────
-  {
-    id: "beb4",
-    name: "Agua Mineral 500ml",
-    category: "bebidas",
-    desc: "Sin gas o con gas.",
-    price: 1.50,
-    img: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400&h=400&fit=crop"
+// --- Carga desde la API ---
+async function loadProducts(showSpinner = true) {
+  if (showSpinner && !allProducts.length) { productsState = 'loading'; renderMenu(); }
+  try {
+    const res = await fetch(API_URL, { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (!Array.isArray(data)) throw new Error((data && data.error) || 'Respuesta inválida');
+    try { localStorage.setItem(PRODUCTS_CACHE_KEY, JSON.stringify(data)); } catch (e) {}
+    applyProducts(data, true);
+    lastFetch = Date.now();
+  } catch (err) {
+    console.error('Error cargando productos:', err);
+    if (!allProducts.length) { productsState = 'error'; renderMenu(); }
   }
-
-];
-
-
-/* ═══════════════════════════════════════════════════════════════
-   🔥  PROMOS
-   ═══════════════════════════════════════════════════════════════ */
-const promociones = [
-
-  // ── Combo Monster ─────────────────────────────────────────
-  {
-    id: "promo1",
-    name: "🚀 Combo Monster",
-    category: "promos",
-    desc: "1 Hamburguesa + Papas + Bebida a elección.",
-    price: 12.90,
-    img: "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400&h=400&fit=crop",
-    badge: "OFERTA",
-    badgeType: "new"
-  },
-
-  // ── Pizza + Bebida ────────────────────────────────────────
-  {
-    id: "promo2",
-    name: "🍕 Pizza + Bebida",
-    category: "promos",
-    desc: "Cualquier pizza + gaseosa 1.5L.",
-    price: 16.90,
-    img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=400&fit=crop"
+}
+function loadCachedProducts() {
+  try {
+    const cached = JSON.parse(localStorage.getItem(PRODUCTS_CACHE_KEY));
+    if (Array.isArray(cached) && cached.length) applyProducts(cached, false);
+  } catch (e) {}
+}
+function applyProducts(data, fresh) {
+  allProducts = parseProducts(data);
+  productsState = 'ready';
+  renderCategories();
+  renderPromoCarousel();
+  if (fresh) syncCartWithProducts();
+  renderMenu();
+  if (document.getElementById('cartSheet')?.classList.contains('open')) renderCartSheet();
+}
+// Actualiza precios/nombres del carrito con los de la hoja y quita lo que ya no existe
+function syncCartWithProducts() {
+  if (!cart.length) return;
+  const before = cart.length;
+  let changed = false;
+  cart = cart.filter(i => allProducts.some(p => p.id === i.id));
+  cart.forEach(i => {
+    const p = allProducts.find(x => x.id === i.id);
+    if (i.price !== p.price || i.name !== p.name || i.img !== p.img) {
+      i.price = p.price; i.name = p.name; i.img = p.img; changed = true;
+    }
+  });
+  if (cart.length !== before) {
+    showToast('Quitamos productos que ya no están disponibles', 'fa-exclamation-circle');
+    changed = true;
   }
-
-];
-
-
-/* ═══════════════════════════════════════════════════════════════
-   ⚙️  SISTEMA — NO TOCAR (arma el catálogo completo)
-   ═══════════════════════════════════════════════════════════════ */
-const allProducts = [...hamburguesas, ...pizzas, ...acompanamientos, ...bebidas, ...promociones];
+  if (changed) { saveCart(); updateCartBadges(); }
+}
+function renderCategories() {
+  const wrap = document.querySelector('#appCats .app-cats-scroll');
+  if (!wrap) return;
+  const keys = [...new Set(allProducts.map(p => p.category))].sort((a, b) => {
+    const ia = CATEGORY_ORDER.indexOf(a), ib = CATEGORY_ORDER.indexOf(b);
+    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+  });
+  if (!keys.length) { wrap.innerHTML = ''; return; }
+  if (!keys.includes(currentCategory)) currentCategory = keys[0];
+  const searching = searchTerm.trim() !== '';
+  wrap.innerHTML = keys.map(k => `
+    <button class="app-cat ${k === currentCategory && !searching ? 'active' : ''}" data-category="${escapeHTML(k)}">
+      <span class="emoji">${categoryMeta[k].emoji}</span> ${escapeHTML(categoryMeta[k].label)}
+    </button>`).join('');
+}
 
 // ================= ESTADO =================
 let cart = [];
@@ -1367,8 +1266,7 @@ function matchesSearch(p, term) {
   return normalizeText(p.name).includes(n) || normalizeText(p.desc).includes(n);
 }
 function getProductsByCategory(cat) {
-  const map = { promos: promociones, hamburguesas, pizzas, acompanamientos, bebidas };
-  return map[cat] || [];
+  return allProducts.filter(p => p.category === cat);
 }
 function getFilteredProducts() {
   return searchTerm.trim() !== ""
@@ -1376,7 +1274,8 @@ function getFilteredProducts() {
     : getProductsByCategory(currentCategory);
 }
 function formatPrice(p) {
-  return `$ ${p.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`;
+  const dec = Number.isInteger(p) ? 0 : 2;
+  return `$ ${p.toLocaleString('es-AR', { minimumFractionDigits: dec, maximumFractionDigits: 2 })}`;
 }
 function getTotal() { return cart.reduce((s, i) => s + i.price * i.quantity, 0); }
 function getTotalItems() { return cart.reduce((s, i) => s + i.quantity, 0); }
@@ -1466,6 +1365,14 @@ function animateNavBadge() {
 
 function renderMenu() {
   const list = document.getElementById('menuList');
+  if (productsState === 'loading') {
+    list.innerHTML = `<div class="app-empty"><div class="app-empty-emoji">🍔</div><div class="app-empty-title">Cargando el menú...</div><div class="app-empty-text">Un segundo, estamos trayendo los productos</div></div>`;
+    return;
+  }
+  if (productsState === 'error') {
+    list.innerHTML = `<div class="app-empty"><div class="app-empty-emoji">⚠️</div><div class="app-empty-title">No pudimos cargar el menú</div><div class="app-empty-text">Revisá tu conexión e intentá de nuevo</div><button class="app-btn app-btn-primary" onclick="loadProducts()" style="max-width:200px; margin: 14px auto 0;">Reintentar</button></div>`;
+    return;
+  }
   const products = getFilteredProducts();
 
   if (products.length === 0) {
@@ -1478,10 +1385,8 @@ function renderMenu() {
     return;
   }
 
-  const categoryNames = {
-    promos: 'Promos', hamburguesas: 'Burgers', pizzas: 'Pizzas',
-    acompanamientos: 'Extras', bebidas: 'Bebidas'
-  };
+  const categoryNames = {};
+  Object.keys(categoryMeta).forEach(k => categoryNames[k] = categoryMeta[k].label);
   const sectionTitle = searchTerm.trim()
     ? `Resultados (${products.length})`
     : `Las ${categoryNames[currentCategory] || 'estrellas'} del monstruo`;
@@ -1490,19 +1395,19 @@ function renderMenu() {
 
   products.forEach(p => {
     let badgeHTML = '';
-    if (p.badge) badgeHTML = `<div class="product-badge ${p.badgeType || ''}">${p.badge}</div>`;
+    if (p.badge) badgeHTML = `<div class="product-badge ${p.badgeType || ''}">${escapeHTML(p.badge)}</div>`;
     html += `
       <div class="product-item">
         <div class="product-thumb">
           ${badgeHTML}
-          <img src="${p.img}" alt="${p.name}" loading="lazy">
+          <img src="${escapeHTML(p.img)}" alt="${escapeHTML(p.name)}" loading="lazy" onerror="this.src='https://via.placeholder.com/400/151515/FFD000?text=MB'">
         </div>
         <div class="product-info">
-          <div class="product-name">${p.name}</div>
-          <div class="product-desc">${p.desc}</div>
+          <div class="product-name">${escapeHTML(p.name)}</div>
+          <div class="product-desc">${escapeHTML(p.desc)}</div>
           <div class="product-bottom">
             <div class="product-price">${formatPrice(p.price)}</div>
-            <button class="product-add" data-id="${p.id}" aria-label="Agregar">
+            <button class="product-add" data-id="${escapeHTML(p.id)}" aria-label="Agregar">
               <i class="fas fa-plus"></i>
             </button>
           </div>
@@ -1540,9 +1445,9 @@ function renderCartSheet() {
     const sub = item.price * item.quantity;
     html += `
       <div class="cart-item">
-        <img class="cart-item-img" src="${item.img}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/60/151515/FFD000?text=MB'">
+        <img class="cart-item-img" src="${escapeHTML(item.img)}" alt="${escapeHTML(item.name)}" onerror="this.src='https://via.placeholder.com/60/151515/FFD000?text=MB'">
         <div class="cart-item-info">
-          <div class="cart-item-name">${item.name}</div>
+          <div class="cart-item-name">${escapeHTML(item.name)}</div>
           <div class="cart-item-price">${formatPrice(item.price)} c/u</div>
           <div class="cart-item-qty">
             <button class="qty-btn" onclick="updateQuantity('${item.id}', -1)">−</button>
@@ -1662,15 +1567,17 @@ function closeCartSheet() {
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeCartSheet(); });
 
 function initCats() {
-  document.querySelectorAll('.app-cat').forEach(btn => {
-    btn.addEventListener('click', () => {
-      currentCategory = btn.dataset.category;
-      searchTerm = '';
-      document.getElementById('searchInput').value = '';
-      document.querySelectorAll('.app-cat').forEach(b => b.classList.toggle('active', b === btn));
-      renderMenu();
-      document.getElementById('menuList').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
+  const wrap = document.querySelector('#appCats .app-cats-scroll');
+  if (!wrap) return;
+  wrap.addEventListener('click', (e) => {
+    const btn = e.target.closest('.app-cat');
+    if (!btn) return;
+    currentCategory = btn.dataset.category;
+    searchTerm = '';
+    document.getElementById('searchInput').value = '';
+    wrap.querySelectorAll('.app-cat').forEach(b => b.classList.toggle('active', b === btn));
+    renderMenu();
+    document.getElementById('menuList').scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 }
 function initSearch() {
@@ -1737,11 +1644,17 @@ function hideSplash() {
 function init() {
   hideSplash();
   initCats();
+  initPromoCarousel();
   initSearch();
   initHeaderScroll();
   initSheetSwipe();
   loadCart();
+  loadCachedProducts();   // muestra el último menú guardado al instante
   renderMenu();
+  loadProducts();         // y lo actualiza con la hoja de Google
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && Date.now() - lastFetch > REFRESH_MS) loadProducts(false);
+  });
 }
 init();
 </script>
