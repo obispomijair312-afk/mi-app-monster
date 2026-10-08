@@ -1032,6 +1032,7 @@ body {
 // ================= CONFIG =================
 const WHATSAPP_NUMBER = '541173642832';
 const BRAND_NAME = 'MONSTER BURGER';
+const DELIVERY_ZONES = ['San Miguel', 'Muñiz', 'Bella Vista']; // únicas localidades con entrega (Prov. de Buenos Aires)
 
 // ================= PRODUCTOS (desde Google Sheets vía SheetDB) =================
 const API_URL = 'https://sheetdb.io/api/v1/t0i7d5sh7kwuf';
@@ -1487,7 +1488,14 @@ function renderCartSheet() {
       </div>
       <div class="form-field">
         <label><i class="fas fa-home"></i> Dirección *</label>
-        <input type="text" id="shipping-address" placeholder="Calle, número, barrio" autocomplete="off">
+        <select id="shipping-zone" style="margin-bottom: 8px;">
+          <option value="">Localidad (solo zona de entrega)...</option>
+          <option value="San Miguel">📍 San Miguel</option>
+          <option value="Muñiz">📍 Muñiz</option>
+          <option value="Bella Vista">📍 Bella Vista</option>
+        </select>
+        <input type="text" id="shipping-address" placeholder="Calle y número (ej: Paunero 1234)" autocomplete="off">
+        <div style="font-size: 0.7rem; color: #888; margin-top: 6px;">🛵 Entregamos solo en San Miguel, Muñiz y Bella Vista (Buenos Aires).</div>
       </div>
       <div class="form-field">
         <label><i class="fas fa-credit-card"></i> Pago *</label>
@@ -1526,14 +1534,20 @@ function checkout() {
   if (cart.length === 0) { showToast('El carrito está vacío', 'fa-exclamation-circle'); return; }
   const name = document.getElementById('customer-name')?.value.trim();
   const phone = document.getElementById('customer-phone')?.value.trim();
-  const addr = document.getElementById('shipping-address')?.value.trim();
+  const street = document.getElementById('shipping-address')?.value.trim();
+  const zone = document.getElementById('shipping-zone')?.value;
   const pay = document.getElementById('payment-method')?.value;
   const notes = document.getElementById('customer-notes')?.value.trim();
 
-  if (!name || !phone || !addr || !pay) {
+  if (!zone || !DELIVERY_ZONES.includes(zone)) {
+    showToast('Elegí tu localidad: San Miguel, Muñiz o Bella Vista', 'fa-map-marker-alt');
+    return;
+  }
+  if (!name || !phone || !street || !pay) {
     showToast('Completá todos los campos', 'fa-exclamation-circle');
     return;
   }
+  const addr = `${street}, ${zone}, Buenos Aires`;
 
   let msg = `🛒 *NUEVO PEDIDO - ${BRAND_NAME}*\n\n`;
   msg += "👤 *CLIENTE*\n";
